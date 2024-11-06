@@ -1,0 +1,29 @@
+{
+    "name": "FilamentWorkflows",
+    "alias": "filament-workflows",
+    "description": {
+        "ar": "Manage and generate workflows using Filament Account Builder and Form Builder with multi approve steps",
+        "en": "Manage and generate workflows using Filament Account Builder and Form Builder with multi approve steps",
+        "gr": "Manage and generate workflows using Filament Account Builder and Form Builder with multi approve steps",
+        "sp": "Manage and generate workflows using Filament Account Builder and Form Builder with multi approve steps"
+    },
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "TomatoPHP\\FilamentWorkflows\\FilamentWorkflowsServiceProvider"
+    ],
+    "files": [],
+    "title": {
+        "ar": "Workflows Builder",
+        "en": "Workflows Builder",
+        "gr": "Workflows Builder",
+        "sp": "Workflows Builder"
+    },
+    "color": "#cc1448",
+    "icon": "heroicon-c-users",
+    "placeholder": "https://raw.githubusercontent.com/tomatophp/filament-workflows/master/art/screenshot.jpg",
+    "type": "plugin",
+    "version": "v1.0.0",
+    "github" : "https://github.com/tomatophp/filament-workflows",
+    "docs" : "https://github.com/tomatophp/filament-workflows"
+}
