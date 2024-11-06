@@ -6,6 +6,7 @@ use TomatoPHP\FilamentWorkflows\Models\TriggerHasAction;
 
 abstract class Action
 {
-    public static abstract function run(mixed $event, TriggerHasAction $action): void;
-    public static abstract function form(): array;
+    abstract public static function run(mixed $event, TriggerHasAction $action): void;
+
+    abstract public static function form(): array;
 }

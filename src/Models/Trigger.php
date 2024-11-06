@@ -9,24 +9,25 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @property string $id
-* @property string $team_id
-* @property string $name
-* @property string $type
-* @property string $model_action
-* @property string $model_type
-* @property string $model_id
-* @property string $event
-* @property string $webhook
-* @property string $where
-* @property string $is
-* @property string $value
-* @property string $color
-* @property string $icon
-* @property string $payload
+ * @property string $team_id
+ * @property string $name
+ * @property string $type
+ * @property string $model_action
+ * @property string $model_type
+ * @property string $model_id
+ * @property string $event
+ * @property string $webhook
+ * @property string $where
+ * @property string $is
+ * @property string $value
+ * @property string $color
+ * @property string $icon
+ * @property string $payload
  */
 class Trigger extends Model
 {
     use HasFactory;
+
     /**
      * @var array
      */
@@ -45,33 +46,24 @@ class Trigger extends Model
         'value',
         'color',
         'icon',
-        'payload'
+        'payload',
     ];
 
     protected $casts = [
         'value' => 'json',
-        'payload' => 'json'
+        'payload' => 'json',
     ];
 
-    /**
-     * @return MorphTo
-     */
     public function model(): MorphTo
     {
         return $this->morphTo();
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function workflows(): BelongsToMany
     {
         return $this->belongsToMany(Workflow::class, 'workflows_has_triggers');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function actions(): BelongsToMany
     {
         return $this->belongsToMany(Action::class, 'triggers_has_actions');

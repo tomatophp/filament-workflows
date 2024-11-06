@@ -2,13 +2,13 @@
 
 namespace TomatoPHP\FilamentWorkflows\Filament\Resources;
 
-use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowResource\Pages;
-use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowResource\RelationManagers;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowResource\Pages;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowResource\RelationManagers;
 use TomatoPHP\FilamentWorkflows\Models\Workflow;
 
 class WorkflowResource extends Resource
@@ -25,13 +25,13 @@ class WorkflowResource extends Resource
                     ->columnSpanFull()
                     ->searchable()
                     ->options([
-                        "workflow" => "Workflow",
-                        "trigger" => "Trigger",
+                        'workflow' => 'Workflow',
+                        'trigger' => 'Trigger',
                     ])
                     ->default('workflow'),
                 Forms\Components\TextInput::make('name')
                     ->lazy()
-                    ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set){
+                    ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
                         $set('key', str($get('name'))->lower()->slug()->toString());
                     })
                     ->required(),
@@ -49,7 +49,7 @@ class WorkflowResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->description(fn($record) => $record->description)
+                    ->description(fn ($record) => $record->description)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('key')
                     ->searchable(),
@@ -72,7 +72,7 @@ class WorkflowResource extends Resource
             ])
             ->actions([
                 Tables\Actions\Action::make('build')
-                    ->url(fn($record) => Pages\BuildWorkflow::getUrl(['record' => $record])),
+                    ->url(fn ($record) => Pages\BuildWorkflow::getUrl(['record' => $record])),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -85,7 +85,7 @@ class WorkflowResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\WorkflowLogsRelationManager::class
+            RelationManagers\WorkflowLogsRelationManager::class,
         ];
     }
 

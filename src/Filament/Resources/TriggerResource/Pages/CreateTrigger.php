@@ -2,9 +2,8 @@
 
 namespace TomatoPHP\FilamentWorkflows\Filament\Resources\TriggerResource\Pages;
 
-use TomatoPHP\FilamentWorkflows\Filament\Resources\TriggerResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\TriggerResource;
 
 class CreateTrigger extends CreateRecord
 {

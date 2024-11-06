@@ -2,13 +2,12 @@
 
 namespace TomatoPHP\FilamentWorkflows\Filament\Resources;
 
-use TomatoPHP\FilamentWorkflows\Filament\Resources\TriggerResource\Pages;
-use TomatoPHP\FilamentWorkflows\Filament\Resources\TriggerResource\RelationManagers;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\TriggerResource\Pages;
 use TomatoPHP\FilamentWorkflows\Models\Trigger;
 
 class TriggerResource extends Resource

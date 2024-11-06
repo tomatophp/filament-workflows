@@ -2,9 +2,9 @@
 
 namespace TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowResource\Pages;
 
-use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowResource;
 
 class ListWorkflows extends ListRecords
 {

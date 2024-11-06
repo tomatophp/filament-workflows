@@ -2,9 +2,8 @@
 
 namespace TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowResource\Pages;
 
-use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowResource;
 
 class CreateWorkflow extends CreateRecord
 {

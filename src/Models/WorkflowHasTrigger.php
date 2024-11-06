@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WorkflowHasTrigger extends Model
 {
-    protected $table = "workflows_has_triggers";
+    protected $table = 'workflows_has_triggers';
 
     protected $fillable = [
         'workflow_id',
@@ -16,27 +16,18 @@ class WorkflowHasTrigger extends Model
         'payload',
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function workflow(): BelongsTo
     {
         return $this->belongsTo(Workflow::class, 'workflow_id');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function trigger(): BelongsTo
     {
         return $this->belongsTo(Trigger::class, 'trigger_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function actions(): HasMany
     {
-        return $this->hasMany(TriggerHasAction::class,  'workflows_has_triggers_id', 'id');
+        return $this->hasMany(TriggerHasAction::class, 'workflows_has_triggers_id', 'id');
     }
 }

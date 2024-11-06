@@ -2,9 +2,9 @@
 
 namespace TomatoPHP\FilamentWorkflows\Filament\Resources\TriggerResource\Pages;
 
-use TomatoPHP\FilamentWorkflows\Filament\Resources\TriggerResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\TriggerResource;
 
 class ListTriggers extends ListRecords
 {

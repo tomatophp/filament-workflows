@@ -15,15 +15,13 @@ class WorkflowWebhookMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if($request->has('token')){
-            if($request->get('token') === config('filament-workflows.webhook_token')){
+        if ($request->has('token')) {
+            if ($request->get('token') === config('filament-workflows.webhook_token')) {
                 return $next($request);
-            }
-            else {
+            } else {
                 abort(403);
             }
-        }
-        else {
+        } else {
             abort(403);
         }
 

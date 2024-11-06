@@ -8,14 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property string $id
-* @property string $team_id
-* @property string $name
-* @property string $description
-* @property string $type
-* @property string $action
-* @property string $payload
-* @property string $color
-* @property string $icon
+ * @property string $team_id
+ * @property string $name
+ * @property string $description
+ * @property string $type
+ * @property string $action
+ * @property string $payload
+ * @property string $color
+ * @property string $icon
  */
 class Action extends Model
 {
@@ -33,18 +33,14 @@ class Action extends Model
         'action',
         'payload',
         'color',
-        'icon'
+        'icon',
     ];
 
     protected $casts = [
         'description' => 'json',
-        'payload' => 'json'
+        'payload' => 'json',
     ];
 
-
-    /**
-     * @return BelongsToMany
-     */
     public function triggers(): BelongsToMany
     {
         return $this->belongsToMany(Trigger::class, 'triggers_has_actions');

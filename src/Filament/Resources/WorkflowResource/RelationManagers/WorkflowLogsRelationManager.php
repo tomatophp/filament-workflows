@@ -11,7 +11,6 @@ class WorkflowLogsRelationManager extends RelationManager
 {
     protected static string $relationship = 'logs';
 
-
     public function table(Table $table): Table
     {
         return WorkflowLogResource::table($table);

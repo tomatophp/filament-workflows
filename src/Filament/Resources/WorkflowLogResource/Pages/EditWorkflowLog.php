@@ -2,9 +2,9 @@
 
 namespace TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowLogResource\Pages;
 
-use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowLogResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowLogResource;
 
 class EditWorkflowLog extends EditRecord
 {

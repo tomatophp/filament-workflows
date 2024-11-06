@@ -8,13 +8,11 @@ use TomatoPHP\FilamentWorkflows\Events\Models\ModelCreated;
 use TomatoPHP\FilamentWorkflows\Events\Models\ModelDeleted;
 use TomatoPHP\FilamentWorkflows\Events\Models\ModelUpdated;
 use TomatoPHP\FilamentWorkflows\Events\Webhook\WebhookEvent;
-use TomatoPHP\FilamentWorkflows\Facades\FilamentWorkflows;
 use TomatoPHP\FilamentWorkflows\Listeners\ModelCreatedListener;
 use TomatoPHP\FilamentWorkflows\Listeners\ModelDeletedListener;
 use TomatoPHP\FilamentWorkflows\Listeners\ModelUpdatedListener;
 use TomatoPHP\FilamentWorkflows\Listeners\WebhookListener;
 use TomatoPHP\FilamentWorkflows\Services\WorkflowServices;
-
 
 class FilamentWorkflowsServiceProvider extends ServiceProvider
 {
@@ -22,7 +20,7 @@ class FilamentWorkflowsServiceProvider extends ServiceProvider
     {
         //Register generate command
         $this->commands([
-           \TomatoPHP\FilamentWorkflows\Console\FilamentWorkflowsInstall::class,
+            \TomatoPHP\FilamentWorkflows\Console\FilamentWorkflowsInstall::class,
         ]);
 
         //Register Config file
@@ -30,7 +28,7 @@ class FilamentWorkflowsServiceProvider extends ServiceProvider
 
         //Publish Config
         $this->publishes([
-           __DIR__.'/../config/filament-workflows.php' => config_path('filament-workflows.php'),
+            __DIR__.'/../config/filament-workflows.php' => config_path('filament-workflows.php'),
         ], 'filament-workflows-config');
 
         //Register Migrations
@@ -38,14 +36,14 @@ class FilamentWorkflowsServiceProvider extends ServiceProvider
 
         //Publish Migrations
         $this->publishes([
-           __DIR__.'/../database/migrations' => database_path('migrations'),
+            __DIR__.'/../database/migrations' => database_path('migrations'),
         ], 'filament-workflows-migrations');
         //Register views
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'filament-workflows');
 
         //Publish Views
         $this->publishes([
-           __DIR__.'/../resources/views' => resource_path('views/vendor/filament-workflows'),
+            __DIR__.'/../resources/views' => resource_path('views/vendor/filament-workflows'),
         ], 'filament-workflows-views');
 
         //Register Langs
@@ -53,14 +51,14 @@ class FilamentWorkflowsServiceProvider extends ServiceProvider
 
         //Publish Lang
         $this->publishes([
-           __DIR__.'/../resources/lang' => base_path('lang/vendor/filament-workflows'),
+            __DIR__.'/../resources/lang' => base_path('lang/vendor/filament-workflows'),
         ], 'filament-workflows-lang');
 
         //Register Routes
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
 
         $this->app->bind('filament-workflows', function () {
-            return new WorkflowServices();
+            return new WorkflowServices;
         });
     }
 

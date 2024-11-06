@@ -8,7 +8,6 @@ use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowResource;
 
 class FilamentWorkflowsPlugin implements Plugin
 {
-
     public function getId(): string
     {
         return 'filament-workflows';
@@ -17,7 +16,7 @@ class FilamentWorkflowsPlugin implements Plugin
     public function register(Panel $panel): void
     {
         $panel->resources([
-           WorkflowResource::class
+            WorkflowResource::class,
         ]);
     }
 

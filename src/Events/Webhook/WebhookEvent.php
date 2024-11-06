@@ -6,7 +6,6 @@ use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Http\Request;
 use Illuminate\Queue\SerializesModels;
 
 class WebhookEvent implements ShouldBroadcast
@@ -18,8 +17,7 @@ class WebhookEvent implements ShouldBroadcast
      */
     public function __construct(
         public array $data,
-    )
-    {
+    ) {
         //
     }
 

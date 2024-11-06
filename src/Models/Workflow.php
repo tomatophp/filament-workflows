@@ -10,22 +10,23 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @property string $id
-* @property string $team_id
-* @property string $user_id
-* @property string $user_type
-* @property string $model_id
-* @property string $model_type
-* @property string $name
-* @property string $key
-* @property string $description
-* @property string $type
-* @property string $status
-* @property string $payload
-* @property string $is_active
+ * @property string $team_id
+ * @property string $user_id
+ * @property string $user_type
+ * @property string $model_id
+ * @property string $model_type
+ * @property string $name
+ * @property string $key
+ * @property string $description
+ * @property string $type
+ * @property string $status
+ * @property string $payload
+ * @property string $is_active
  */
 class Workflow extends Model
 {
     use HasFactory;
+
     /**
      * @var array
      */
@@ -42,21 +43,14 @@ class Workflow extends Model
         'type',
         'status',
         'payload',
-        'is_active'
+        'is_active',
     ];
 
-
-    /**
-     * @return MorphTo
-     */
     public function user(): MorphTo
     {
         return $this->morphTo();
     }
 
-    /**
-     * @return MorphTo
-     */
     public function model(): MorphTo
     {
         return $this->morphTo();
@@ -66,20 +60,14 @@ class Workflow extends Model
         'name' => 'json',
         'description' => 'json',
         'payload' => 'json',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
     ];
 
-    /**
-     * @return BelongsToMany
-     */
     public function triggers(): BelongsToMany
     {
         return $this->belongsToMany(Trigger::class, 'workflows_has_triggers')->withPivot('payload');
     }
 
-    /**
-     * @return HasMany
-     */
     public function logs(): HasMany
     {
         return $this->hasMany(WorkflowLog::class);

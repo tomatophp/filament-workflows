@@ -2,13 +2,12 @@
 
 namespace TomatoPHP\FilamentWorkflows\Filament\Resources;
 
-use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowLogResource\Pages;
-use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowLogResource\RelationManagers;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowLogResource\Pages;
 use TomatoPHP\FilamentWorkflows\Models\WorkflowLog;
 
 class WorkflowLogResource extends Resource
@@ -44,7 +43,7 @@ class WorkflowLogResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('created_at')
-                    ->description(fn($record) => $record->created_at->diffForHumans())
+                    ->description(fn ($record) => $record->created_at->diffForHumans())
                     ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('log'),

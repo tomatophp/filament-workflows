@@ -4,8 +4,6 @@ namespace TomatoPHP\FilamentWorkflows\Events\Models;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -20,8 +18,7 @@ class ModelCreated implements ShouldBroadcast
     public function __construct(
         public \Illuminate\Database\Eloquent\Model $data,
         public \TomatoPHP\FilamentWorkflows\Models\Trigger $trigger
-    )
-    {
+    ) {
         //
     }
 

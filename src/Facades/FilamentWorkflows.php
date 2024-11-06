@@ -14,9 +14,6 @@ use Illuminate\Support\Facades\Facade;
  */
 class FilamentWorkflows extends Facade
 {
-    /**
-     * @return string
-     */
     protected static function getFacadeAccessor(): string
     {
         return 'filament-workflows';
