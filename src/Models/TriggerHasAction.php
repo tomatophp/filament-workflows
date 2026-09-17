@@ -15,6 +15,10 @@ class TriggerHasAction extends Model
         'payload',
     ];
 
+    protected $casts = [
+        'payload' => 'array',
+    ];
+
     public function trigger(): BelongsTo
     {
         return $this->belongsTo(WorkflowHasTrigger::class, 'workflows_has_triggers_id');

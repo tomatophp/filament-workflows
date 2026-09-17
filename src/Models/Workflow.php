@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use TomatoPHP\FilamentWorkflows\Database\Factories\WorkflowFactory;
 
 /**
  * @property string $id
@@ -26,6 +27,11 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class Workflow extends Model
 {
     use HasFactory;
+
+    protected static function newFactory(): WorkflowFactory
+    {
+        return WorkflowFactory::new();
+    }
 
     /**
      * @var array

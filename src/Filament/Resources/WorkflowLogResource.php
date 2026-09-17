@@ -2,39 +2,51 @@
 
 namespace TomatoPHP\FilamentWorkflows\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Forms\Form;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowLogResource\Pages;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowLogResource\Pages\CreateWorkflowLog;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowLogResource\Pages\EditWorkflowLog;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowLogResource\Pages\ListWorkflowLogs;
+use TomatoPHP\FilamentWorkflows\Models\Workflow;
 use TomatoPHP\FilamentWorkflows\Models\WorkflowLog;
+use UnitEnum;
 
 class WorkflowLogResource extends Resource
 {
     protected static ?string $model = WorkflowLog::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
-    public static function form(Form $form): Form
+    protected static string|UnitEnum|null $navigationGroup = 'Workflows';
+
+    protected static ?int $navigationSort = 4;
+
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('team_id')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('user_type')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('user_id')
-                    ->maxLength(255),
-                Forms\Components\Select::make('workflow_id')
-                    ->relationship('workflow', 'name')
+        return $schema
+            ->components([
+                Select::make('workflow_id')
+                    ->relationship('workflow', 'key')
+                    ->getOptionLabelFromRecordUsing(fn (Workflow $record) => (string) $record->name)
                     ->required(),
-                Forms\Components\Select::make('trigger_id')
+                Select::make('trigger_id')
                     ->relationship('trigger', 'name'),
-                Forms\Components\Select::make('action_id')
+                Select::make('action_id')
                     ->relationship('action', 'name'),
-                Forms\Components\TextInput::make('log'),
-                Forms\Components\TextInput::make('payload'),
+                TextInput::make('log')
+                    ->columnSpanFull(),
+                KeyValue::make('payload')
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -42,51 +54,45 @@ class WorkflowLogResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('created_at')
-                    ->description(fn ($record) => $record->created_at->diffForHumans())
+                TextColumn::make('created_at')
+                    ->description(fn (WorkflowLog $record) => $record->created_at?->diffForHumans())
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('log'),
-                Tables\Columns\TextColumn::make('trigger.name')
-                    ->icon('heroicon-s-arrow-down-circle')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('action.name')
-                    ->icon('heroicon-s-arrow-small-right')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('workflow.name')
+                    ->label('Workflow'),
+                TextColumn::make('log')
+                    ->wrap(),
+                TextColumn::make('trigger.name')
+                    ->icon('heroicon-s-arrow-down-circle'),
+                TextColumn::make('action.name')
+                    ->icon('heroicon-s-arrow-small-right'),
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('workflow_id')
+                    ->label('Workflow')
+                    ->relationship('workflow', 'key'),
             ])
             ->defaultSort('created_at', 'desc')
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListWorkflowLogs::route('/'),
-            'create' => Pages\CreateWorkflowLog::route('/create'),
-            'edit' => Pages\EditWorkflowLog::route('/{record}/edit'),
+            'index' => ListWorkflowLogs::route('/'),
+            'create' => CreateWorkflowLog::route('/create'),
+            'edit' => EditWorkflowLog::route('/{record}/edit'),
         ];
     }
 }

@@ -2,7 +2,7 @@
 
 namespace TomatoPHP\FilamentWorkflows\Filament\Resources\ActionResource\Pages;
 
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use TomatoPHP\FilamentWorkflows\Filament\Resources\ActionResource;
 
@@ -13,7 +13,7 @@ class EditAction extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

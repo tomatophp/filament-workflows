@@ -4,6 +4,7 @@ namespace TomatoPHP\FilamentWorkflows;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use TomatoPHP\FilamentWorkflows\Console\FilamentWorkflowsInstall;
 use TomatoPHP\FilamentWorkflows\Events\Models\ModelCreated;
 use TomatoPHP\FilamentWorkflows\Events\Models\ModelDeleted;
 use TomatoPHP\FilamentWorkflows\Events\Models\ModelUpdated;
@@ -18,46 +19,46 @@ class FilamentWorkflowsServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //Register generate command
+        // Register generate command
         $this->commands([
-            \TomatoPHP\FilamentWorkflows\Console\FilamentWorkflowsInstall::class,
+            FilamentWorkflowsInstall::class,
         ]);
 
-        //Register Config file
+        // Register Config file
         $this->mergeConfigFrom(__DIR__.'/../config/filament-workflows.php', 'filament-workflows');
 
-        //Publish Config
+        // Publish Config
         $this->publishes([
             __DIR__.'/../config/filament-workflows.php' => config_path('filament-workflows.php'),
         ], 'filament-workflows-config');
 
-        //Register Migrations
+        // Register Migrations
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
-        //Publish Migrations
+        // Publish Migrations
         $this->publishes([
             __DIR__.'/../database/migrations' => database_path('migrations'),
         ], 'filament-workflows-migrations');
-        //Register views
+        // Register views
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'filament-workflows');
 
-        //Publish Views
+        // Publish Views
         $this->publishes([
             __DIR__.'/../resources/views' => resource_path('views/vendor/filament-workflows'),
         ], 'filament-workflows-views');
 
-        //Register Langs
+        // Register Langs
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'filament-workflows');
 
-        //Publish Lang
+        // Publish Lang
         $this->publishes([
             __DIR__.'/../resources/lang' => base_path('lang/vendor/filament-workflows'),
         ], 'filament-workflows-lang');
 
-        //Register Routes
+        // Register Routes
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
 
-        $this->app->bind('filament-workflows', function () {
+        $this->app->singleton('filament-workflows', function () {
             return new WorkflowServices;
         });
     }

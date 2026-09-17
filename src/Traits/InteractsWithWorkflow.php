@@ -2,53 +2,48 @@
 
 namespace TomatoPHP\FilamentWorkflows\Traits;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Event;
 use TomatoPHP\FilamentWorkflows\Events\Models\ModelCreated;
 use TomatoPHP\FilamentWorkflows\Events\Models\ModelDeleted;
 use TomatoPHP\FilamentWorkflows\Events\Models\ModelUpdated;
 use TomatoPHP\FilamentWorkflows\Facades\FilamentWorkflows;
-use TomatoPHP\FilamentWorkflows\Models\Trigger;
 use TomatoPHP\FilamentWorkflows\Services\Contracts\WorkflowModel;
+use TomatoPHP\FilamentWorkflows\Services\WorkflowRunner;
 
 use function Filament\Support\get_model_label;
 
+/**
+ * Add to an Eloquent model so "model" triggers fire on created / updated / deleted.
+ *
+ * Triggers are looked up when the model event happens (not while the model boots),
+ * so the trait is safe before the workflow tables are migrated.
+ */
 trait InteractsWithWorkflow
 {
-    public static function boot()
+    public static function bootInteractsWithWorkflow(): void
     {
-        parent::boot();
-
         FilamentWorkflows::model(
-            WorkflowModel::make(get_model_label(self::class))
-                ->model(get_class(new self))
+            WorkflowModel::make(get_model_label(static::class))
+                ->model(static::class)
         );
 
-        $triggers = Trigger::query()->where('model_type', get_class(new self))->get();
+        static::created(function (Model $instance): void {
+            foreach (WorkflowRunner::modelTriggers($instance, 'created') as $trigger) {
+                Event::dispatch(new ModelCreated($instance, $trigger));
+            }
+        });
 
-        if (count($triggers) > 0) {
-            static::created(function ($instance) use ($triggers) {
-                foreach ($triggers as $trigger) {
-                    if ($trigger->model_action === 'created') {
-                        Event::dispatch(new ModelCreated($instance, $trigger));
-                    }
-                }
-            });
+        static::updated(function (Model $instance): void {
+            foreach (WorkflowRunner::modelTriggers($instance, 'updated') as $trigger) {
+                Event::dispatch(new ModelUpdated($instance, $trigger));
+            }
+        });
 
-            static::updated(function ($instance) use ($triggers) {
-                foreach ($triggers as $trigger) {
-                    if ($trigger->model_action === 'updated') {
-                        Event::dispatch(new ModelUpdated($instance, $trigger));
-                    }
-                }
-            });
-
-            static::deleted(function ($instance) use ($triggers) {
-                foreach ($triggers as $trigger) {
-                    if ($trigger->model_action === 'deleted') {
-                        Event::dispatch(new ModelDeleted($instance, $trigger));
-                    }
-                }
-            });
-        }
+        static::deleted(function (Model $instance): void {
+            foreach (WorkflowRunner::modelTriggers($instance, 'deleted') as $trigger) {
+                Event::dispatch(new ModelDeleted($instance, $trigger));
+            }
+        });
     }
 }

@@ -5,6 +5,7 @@ namespace TomatoPHP\FilamentWorkflows\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use TomatoPHP\FilamentWorkflows\Database\Factories\ActionFactory;
 
 /**
  * @property string $id
@@ -20,6 +21,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Action extends Model
 {
     use HasFactory;
+
+    protected static function newFactory(): ActionFactory
+    {
+        return ActionFactory::new();
+    }
 
     /**
      * @var array

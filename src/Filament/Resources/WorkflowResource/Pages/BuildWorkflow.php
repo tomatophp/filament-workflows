@@ -3,136 +3,95 @@
 namespace TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowResource\Pages;
 
 use Filament\Actions\Action;
-use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\ViewRecord;
-use TomatoPHP\FilamentIcons\Components\IconPicker;
-use TomatoPHP\FilamentWorkflows\Facades\FilamentWorkflows;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Collection;
+use Throwable;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\ActionResource;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\TriggerResource;
 use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowResource;
+use TomatoPHP\FilamentWorkflows\Models\Action as ActionModel;
 use TomatoPHP\FilamentWorkflows\Models\Trigger;
 use TomatoPHP\FilamentWorkflows\Models\TriggerHasAction;
+use TomatoPHP\FilamentWorkflows\Models\Workflow;
 use TomatoPHP\FilamentWorkflows\Models\WorkflowHasTrigger;
+use TomatoPHP\FilamentWorkflows\Services\Abstracts\Action as WorkflowActionHandler;
 
+/**
+ * @property Workflow $record
+ */
 class BuildWorkflow extends ViewRecord
 {
     protected static string $resource = WorkflowResource::class;
 
-    protected static string $view = 'filament-workflows::builder';
+    protected string $view = 'filament-workflows::builder';
 
-    protected function getTriggerForm(): array
+    public function getTitle(): string
     {
-        return [
-            Forms\Components\Grid::make([
-                'md' => 6,
-                'sm' => 1,
-            ])
-                ->schema([
-                    Forms\Components\Select::make('type')
-                        ->columnSpanFull()
-                        ->searchable()
-                        ->live()
-                        ->options([
-                            'model' => 'Model',
-                            'event' => 'Event',
-                            'webhook' => 'Webhook',
-                        ])
-                        ->default('model'),
-                    Forms\Components\TextInput::make('name')
-                        ->columnSpanFull()
-                        ->required()
-                        ->maxLength(255),
-                    Forms\Components\Select::make('model_type')
-                        ->columnSpan(fn (Forms\Get $get) => ! empty($get('model_type')) ? 2 : 6)
-                        ->required()
-                        ->live()
-                        ->visible(fn (Forms\Get $get) => $get('type') === 'model')
-                        ->searchable()
-                        ->options(FilamentWorkflows::getModels()->pluck('label', 'model')->toArray()),
-                    Forms\Components\Select::make('model_id')
-                        ->columnSpan(2)
-                        ->searchable()
-                        ->visible(fn (Forms\Get $get) => $get('type') === 'model' && ! empty($get('model_type')))
-                        ->options(fn (Forms\Get $get) => $get('model_type') ? $get('model_type')::all()->pluck('name', 'id') : []),
-                    Forms\Components\Select::make('model_action')
-                        ->columnSpan(2)
-                        ->required()
-                        ->visible(fn (Forms\Get $get) => $get('type') === 'model' && ! empty($get('model_type')))
-                        ->searchable()
-                        ->options([
-                            'created' => 'Created',
-                            'updated' => 'Updated',
-                            'deleted' => 'Deleted',
-                        ])
-                        ->default('created'),
-                    Forms\Components\Select::make('event')
-                        ->required()
-                        ->lazy()
-                        ->columnSpanFull()
-                        ->visible(fn (Forms\Get $get) => $get('type') === 'event')
-                        ->searchable()
-                        ->options(FilamentWorkflows::getEvents()->pluck('label', 'event')->toArray()),
-                    Forms\Components\TextInput::make('webhook')
-                        ->required()
-                        ->columnSpanFull()
-                        ->lazy()
-                        ->visible(fn (Forms\Get $get) => $get('type') === 'webhook')
-                        ->maxLength(255),
-                    Forms\Components\TextInput::make('where')
-                        ->visible(fn (Forms\Get $get) => ! empty($get('model_type')) || ! empty($get('event')) || ! empty($get('webhook')))
-                        ->columnSpan(2)
-                        ->maxLength(255),
-                    Forms\Components\Select::make('is')
-                        ->visible(fn (Forms\Get $get) => ! empty($get('model_type')) || ! empty($get('event')) || ! empty($get('webhook')))
-                        ->columnSpan(2)
-                        ->searchable()
-                        ->options([
-                            '=' => '=',
-                            '>' => '>',
-                            '<' => '<',
-                            '>=' => '>=',
-                            '<=' => '<=',
-                            '!=' => '!=',
-                        ])
-                        ->default('='),
-                    Forms\Components\TextInput::make('value')
-                        ->visible(fn (Forms\Get $get) => ! empty($get('model_type')) || ! empty($get('event')) || ! empty($get('webhook')))
-                        ->columnSpan(2),
-                    Forms\Components\ColorPicker::make('color')
-                        ->columnSpan(3)
-                        ->default('#fefefe'),
-                    IconPicker::make('icon')
-                        ->columnSpan(3)
-                        ->default('heroicon-s-code-bracket-square'),
-                ]),
-        ];
+        return 'Build: '.$this->getRecord()->name;
     }
 
-    protected function getActionForm(): array
+    /**
+     * Only the logs relation manager is shown under the builder.
+     */
+    public function content(Schema $schema): Schema
     {
-        return [
-            Forms\Components\Grid::make([
-                'md' => 6,
-                'sm' => 1,
-            ])->schema([
-                Forms\Components\TextInput::make('name')
-                    ->columnSpanFull()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('description')
-                    ->columnSpanFull(),
+        return $schema->components([
+            $this->getRelationManagersContentComponent(),
+        ]);
+    }
 
-                Forms\Components\Select::make('action')
-                    ->columnSpanFull()
-                    ->searchable()
-                    ->options(FilamentWorkflows::getActions()->pluck('label', 'action')->toArray()),
+    /**
+     * @return Collection<int, array{trigger: Trigger, actions: Collection<int, TriggerHasAction>}>
+     */
+    public function getBuilderTriggers(): Collection
+    {
+        return $this->getRecord()->triggers()->get()->map(fn (Trigger $trigger) => [
+            'trigger' => $trigger,
+            'actions' => $this->getWorkflowTrigger($trigger->id)?->actions()->with('action')->get() ?? collect(),
+        ]);
+    }
 
-                Forms\Components\ColorPicker::make('color')
-                    ->columnSpan(3)
-                    ->default('#fefefe'),
-                IconPicker::make('icon')
-                    ->columnSpan(3)
-                    ->default('heroiocn-s-arrows-up-down'),
-            ]),
-        ];
+    public function resolveIcon(?string $icon, string $fallback): string
+    {
+        if (blank($icon)) {
+            return $fallback;
+        }
+
+        try {
+            svg($icon);
+
+            return $icon;
+        } catch (Throwable) {
+            return $fallback;
+        }
+    }
+
+    protected function getWorkflowTrigger(int|string $triggerId): ?WorkflowHasTrigger
+    {
+        return WorkflowHasTrigger::query()
+            ->where('workflow_id', $this->getRecord()->getKey())
+            ->where('trigger_id', $triggerId)
+            ->first();
+    }
+
+    protected function findTriggerAction(int|string|null $id): ?TriggerHasAction
+    {
+        return TriggerHasAction::query()
+            ->whereKey($id)
+            ->whereHas('trigger', fn ($query) => $query->where('workflow_id', $this->getRecord()->getKey()))
+            ->first();
+    }
+
+    /**
+     * @return class-string<WorkflowActionHandler>|null
+     */
+    protected function getHandler(?TriggerHasAction $triggerAction): ?string
+    {
+        $handler = $triggerAction?->action?->action;
+
+        return is_string($handler) && is_subclass_of($handler, WorkflowActionHandler::class) ? $handler : null;
     }
 
     protected function getHeaderActions(): array
@@ -140,48 +99,49 @@ class BuildWorkflow extends ViewRecord
         return [
             Action::make('trigger')
                 ->label('Create Trigger')
-                ->form($this->getTriggerForm())
-                ->action(function (array $data) {
+                ->icon('heroicon-s-plus')
+                ->schema(TriggerResource::getTriggerFormComponents())
+                ->action(function (array $data): void {
                     $trigger = Trigger::query()->create($data);
 
                     $this->getRecord()->triggers()->attach([$trigger->id]);
-
-                    $this->js('window.location.reload()');
                 }),
             Action::make('attachTrigger')
                 ->label('Attach Trigger')
-                ->form([
-                    Forms\Components\Select::make('triggers')
+                ->color('gray')
+                ->icon('heroicon-s-link')
+                ->schema([
+                    Select::make('triggers')
                         ->multiple()
-                        ->options(Trigger::all()->pluck('name', 'id')->toArray())
+                        ->required()
+                        ->options(fn () => Trigger::query()
+                            ->whereNotIn('id', $this->getRecord()->triggers()->pluck('triggers.id'))
+                            ->pluck('name', 'id')
+                            ->toArray())
                         ->searchable(),
                 ])
-                ->action(function (array $data) {
-                    $this->getRecord()->triggers()->attach($data['triggers']);
-
-                    $this->js('window.location.reload()');
+                ->action(function (array $data): void {
+                    $this->getRecord()->triggers()->syncWithoutDetaching($data['triggers']);
                 }),
         ];
     }
 
-    public function deleteTrigger(): Action
+    public function deleteTriggerAction(): Action
     {
         return Action::make('deleteTrigger')
             ->iconButton()
             ->requiresConfirmation()
-            ->hiddenLabel()
+            ->modalDescription('The trigger is detached from this workflow; it is not deleted.')
             ->icon('heroicon-s-trash')
-            ->tooltip('Delete Trigger')
-            ->label('Delete Trigger')
+            ->tooltip('Detach Trigger')
+            ->label('Detach Trigger')
             ->color('danger')
-            ->action(function (array $arguments) {
-                $this->getRecord()->triggers()->detach($arguments['trigger']['id']);
-
-                $this->js('window.location.reload()');
+            ->action(function (array $arguments): void {
+                $this->getRecord()->triggers()->detach($arguments['trigger']);
             });
     }
 
-    public function editTrigger(): Action
+    public function editTriggerAction(): Action
     {
         return Action::make('editTrigger')
             ->iconButton()
@@ -189,116 +149,114 @@ class BuildWorkflow extends ViewRecord
             ->tooltip('Edit Trigger')
             ->label('Edit Trigger')
             ->color('warning')
-            ->fillForm(fn (array $arguments) => $arguments['trigger'])
-            ->form($this->getTriggerForm())
-            ->action(function (array $data, array $arguments) {
-                unset($arguments['trigger']['pivot']);
-                $data['id'] = $arguments['trigger']['id'];
-                $this->getRecord()->triggers()
-                    ->updateExistingPivot($arguments['trigger']['id'], [
-                        'payload' => json_encode($data),
-                    ]);
-
-                $this->js('window.location.reload()');
+            ->fillForm(fn (array $arguments) => Trigger::query()->find($arguments['trigger'])?->attributesToArray() ?? [])
+            ->schema(TriggerResource::getTriggerFormComponents())
+            ->action(function (array $data, array $arguments): void {
+                Trigger::query()->findOrFail($arguments['trigger'])->update($data);
             });
     }
 
-    public function createAction(): Action
+    public function createActionForTriggerAction(): Action
     {
-        return Action::make('createAction')
+        return Action::make('createActionForTrigger')
             ->iconButton()
             ->color('success')
             ->icon('heroicon-s-plus')
             ->label('Create Action')
             ->tooltip('Create Action')
-            ->form($this->getActionForm())
-            ->action(function (array $data, array $arguments) {
-                $action = \TomatoPHP\FilamentWorkflows\Models\Action::query()->create($data);
+            ->schema(ActionResource::getActionFormComponents())
+            ->action(function (array $data, array $arguments): void {
+                $workflowTrigger = $this->getWorkflowTrigger($arguments['trigger']);
 
-                $trigger = WorkflowHasTrigger::query()->where('workflow_id', $this->getRecord()->id)
-                    ->where('trigger_id', $arguments['trigger']['id'])
-                    ->first();
-
-                $checkExists = $trigger->actions()->where('action_id', $action['id'])->first();
-                if (! $checkExists) {
-                    $trigger->actions()->create([
-                        'action_id' => $action['id'],
-                    ]);
+                if (! $workflowTrigger) {
+                    return;
                 }
 
-                $this->js('window.location.reload()');
+                $action = ActionModel::query()->create($data);
+
+                $workflowTrigger->actions()->firstOrCreate([
+                    'action_id' => $action->getKey(),
+                ]);
             });
     }
 
-    public function attachAction(): Action
+    public function attachActionsToTriggerAction(): Action
     {
-        return Action::make('attachAction')
+        return Action::make('attachActionsToTrigger')
             ->iconButton()
-            ->icon('heroicon-s-adjustments-horizontal')
+            ->icon('heroicon-s-link')
             ->color('info')
             ->tooltip('Attach Action')
             ->label('Attach Action')
-            ->form([
-                Forms\Components\Select::make('actions')
+            ->schema([
+                Select::make('actions')
                     ->multiple()
-                    ->options(\TomatoPHP\FilamentWorkflows\Models\Action::all()->pluck('name', 'id')->toArray())
+                    ->required()
+                    ->options(fn () => ActionModel::query()->pluck('name', 'id')->toArray())
                     ->searchable(),
             ])
-            ->action(function (array $data, array $arguments) {
-                $trigger = WorkflowHasTrigger::query()->where('workflow_id', $this->getRecord()->id)
-                    ->where('trigger_id', $arguments['trigger']['id'])
-                    ->first();
+            ->action(function (array $data, array $arguments): void {
+                $workflowTrigger = $this->getWorkflowTrigger($arguments['trigger']);
 
-                foreach ($data['actions'] as $action) {
-                    $exists = $trigger->actions()->where('action_id', $action)->first();
-                    if (! $exists) {
-                        $trigger->actions()->create([
-                            'action_id' => $action,
-                        ]);
-                    }
+                if (! $workflowTrigger) {
+                    return;
                 }
 
-                $this->js('window.location.reload()');
+                foreach ($data['actions'] as $actionId) {
+                    $workflowTrigger->actions()->firstOrCreate([
+                        'action_id' => $actionId,
+                    ]);
+                }
             });
     }
 
-    public function deleteAction(): Action
+    public function removeActionFromTriggerAction(): Action
     {
-        return Action::make('deleteAction')
+        return Action::make('removeActionFromTrigger')
             ->requiresConfirmation()
+            ->modalDescription('The action is removed from this trigger; it is not deleted.')
             ->iconButton()
             ->icon('heroicon-s-trash')
             ->color('danger')
-            ->tooltip('Delete Action')
-            ->label('Delete Action')
-            ->action(function (array $arguments) {
-                TriggerHasAction::query()->find($arguments['action']['id'])->delete();
-
-                $this->js('window.location.reload()');
+            ->tooltip('Remove Action')
+            ->label('Remove Action')
+            ->action(function (array $arguments): void {
+                $this->findTriggerAction($arguments['action'] ?? null)?->delete();
             });
     }
 
-    public function editAction(): Action
+    /**
+     * Configure the action settings (the payload passed to the action class).
+     * Only visible when the action class defines a form.
+     */
+    public function editActionSettingsAction(): Action
     {
-        return Action::make('editAction')
-            ->visible(fn (array $arguments) => count(app($arguments['action']['action']['action'])::form()))
-            ->iconButton()
-            ->icon('heroicon-s-pencil')
-            ->color('warning')
-            ->tooltip('Edit Action')
-            ->fillForm(fn (array $arguments) => ! empty($arguments['action']['payload']) ? (array) json_decode($arguments['action']['payload']) : [])
-            ->form(function (array $arguments) {
-                $action = TriggerHasAction::query()->find($arguments['action']['id']);
+        return Action::make('editActionSettings')
+            ->visible(function (array $arguments): bool {
+                $handler = $this->getHandler($this->findTriggerAction($arguments['action'] ?? null));
 
-                return app($action->action->action)::form();
+                return $handler !== null && count($handler::form()) > 0;
             })
-            ->label('Edit Action')
-            ->action(function (array $data, array $arguments) {
-                $action = TriggerHasAction::query()->find($arguments['action']['id']);
-                $action->payload = json_encode($data);
-                $action->save();
+            ->iconButton()
+            ->icon('heroicon-s-cog-6-tooth')
+            ->color('warning')
+            ->tooltip('Action Settings')
+            ->label('Action Settings')
+            ->fillForm(fn (array $arguments) => $this->findTriggerAction($arguments['action'] ?? null)?->payload ?? [])
+            ->schema(function (array $arguments): array {
+                $handler = $this->getHandler($this->findTriggerAction($arguments['action'] ?? null));
 
-                $this->js('window.location.reload()');
+                return $handler ? $handler::form() : [];
+            })
+            ->action(function (array $data, array $arguments): void {
+                $triggerAction = $this->findTriggerAction($arguments['action'] ?? null);
+
+                if (! $triggerAction) {
+                    return;
+                }
+
+                $triggerAction->payload = $data;
+                $triggerAction->save();
             });
     }
 }

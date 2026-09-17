@@ -2,35 +2,16 @@
 
 namespace TomatoPHP\FilamentWorkflows\Events\Models;
 
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Queue\SerializesModels;
+use TomatoPHP\FilamentWorkflows\Models\Trigger;
 
-class ModelUpdated implements ShouldBroadcast
+class ModelUpdated
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
 
-    /**
-     * Create a new event instance.
-     */
     public function __construct(
-        public \Illuminate\Database\Eloquent\Model $data,
-        public \TomatoPHP\FilamentWorkflows\Models\Trigger $trigger
-    ) {
-        //
-    }
-
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
-     */
-    public function broadcastOn(): array
-    {
-        return [
-            new Channel('workflow'),
-        ];
-    }
+        public Model $data,
+        public Trigger $trigger
+    ) {}
 }

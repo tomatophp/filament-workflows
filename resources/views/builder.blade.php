@@ -1,93 +1,72 @@
-<x-filament-panels::page
-    @class([
-        'fi-resource-view-record-page',
-        'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
-        'fi-resource-record-' . $record->getKey(),
-    ])
->
-    @php
-        $relationManagers = $this->getRelationManagers();
-        $hasCombinedRelationManagerTabsWithContent = $this->hasCombinedRelationManagerTabsWithContent();
-    @endphp
+<x-filament-panels::page>
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        @forelse ($this->getBuilderTriggers() as $item)
+            @php
+                $trigger = $item['trigger'];
+                $triggerActions = $item['actions'];
+            @endphp
 
-    <div class="flex flex-col justify-center items-center gap-4">
-        @foreach($this->getRecord()->triggers as $trigger)
-            @php $getTrigger = !empty($trigger->pivot->payload)? (array)json_decode($trigger->pivot->payload): $trigger->toArray()  @endphp
             <x-filament::section
-                class="w-full"
-                :heading="$getTrigger['name']"
-                :description="$getTrigger['description']??null"
-                :icon="$getTrigger['icon']"
-                :headerActions="[
-                    ($this->createAction())(['trigger' => $getTrigger]),
-                    ($this->attachAction())(['trigger' => $getTrigger]),
-                    ($this->editTrigger())(['trigger' => $getTrigger]),
-                    ($this->deleteTrigger())(['trigger' => $getTrigger]),
-                ]"
+                :heading="$trigger->name"
+                :description="match ($trigger->type) {
+                    'model' => 'When ' . ($trigger->model_type ? class_basename($trigger->model_type) : 'a record') . ' is ' . $trigger->model_action,
+                    'event' => 'When ' . ($trigger->event ? class_basename($trigger->event) : 'an event') . ' is dispatched',
+                    'webhook' => 'When the webhook payload has [' . $trigger->webhook . ']',
+                    default => $trigger->type,
+                } . (filled($trigger->where) ? ' and ' . $trigger->where . ' ' . $trigger->is . ' ' . json_encode($trigger->value) : '')"
+                :icon="$this->resolveIcon($trigger->icon, 'heroicon-s-bolt')"
+                icon-color="primary"
             >
+                <x-slot name="afterHeader">
+                    {{ ($this->createActionForTriggerAction)(['trigger' => $trigger->getKey()]) }}
+                    {{ ($this->attachActionsToTriggerAction)(['trigger' => $trigger->getKey()]) }}
+                    {{ ($this->editTriggerAction)(['trigger' => $trigger->getKey()]) }}
+                    {{ ($this->deleteTriggerAction)(['trigger' => $trigger->getKey()]) }}
+                </x-slot>
 
-                    @php $actions = \TomatoPHP\FilamentWorkflows\Models\WorkflowHasTrigger::query()
-                        ->where('trigger_id', $trigger->id)
-                        ->where('workflow_id', $this->getRecord()->id)
-                        ->first();
-                    @endphp
-                    @if($actions && count($actions->actions) > 0)
-                        <div class="flex flex-wrap gap-4">
-                            @foreach($actions->actions as $action)
-                                <x-filament::section
-                                    :heading="$action->action?->name"
-                                    icon="heroicon-s-bolt"
-                                    icon-color="warning"
-                                    :headerActions="[
-                                    ($this->editAction())(['action' => $action]),
-                                    ($this->deleteAction())(['action' => $action]),
-                                ]"
-                                >
-                                    <div class="flex flex-col justify-center items-center">
-                                        <div class="p-3 rounded-lg" style="background-color: {{ $action->action?->color }}">
-                                            <x-icon name="{{ $action->action?->icon }}" class="w-8 h-8" />
-                                        </div>
+                @if ($triggerActions->isNotEmpty())
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: 1rem;">
+                        @foreach ($triggerActions as $triggerAction)
+                            <x-filament::section
+                                :heading="$triggerAction->action?->name ?? 'Missing action'"
+                                :description="is_string($triggerAction->action?->description) ? $triggerAction->action?->description : null"
+                                icon="heroicon-s-arrow-small-right"
+                                icon-color="warning"
+                                compact
+                            >
+                                <x-slot name="afterHeader">
+                                    {{ ($this->editActionSettingsAction)(['action' => $triggerAction->getKey()]) }}
+                                    {{ ($this->removeActionFromTriggerAction)(['action' => $triggerAction->getKey()]) }}
+                                </x-slot>
 
-                                        <div class="mt-3 text-center">
-                                            <p class="text-sm text-gray-400">{{ $action->action?->description }}</p>
-                                        </div>
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="display: flex; padding: 0.75rem; border-radius: 0.5rem; color: #fff; background-color: {{ e($triggerAction->action?->color ?: '#6b7280') }};">
+                                        <x-filament::icon
+                                            :icon="$this->resolveIcon($triggerAction->action?->icon, 'heroicon-s-play')"
+                                            style="width: 1.5rem; height: 1.5rem;"
+                                        />
                                     </div>
-
-                                </x-filament::section>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="flex flex-col justify-center items-center">
-                            <div class="text-center flex flex-col justify-center items-center gap-2">
-                                <x-icon name="heroicon-s-bolt" class="w-8 h-8 text-custom-400" style="--c-400:var(--warning-400);--c-500:var(--warning-500);--c-600:var(--warning-600);" />
-                                <h1>There is no actions here</h1>
-                            </div>
-                        </div>
-                    @endif
+                                    <code style="font-size: 0.75rem; opacity: 0.7; word-break: break-all;">{{ $triggerAction->action?->action ? class_basename($triggerAction->action->action) : '-' }}</code>
+                                </div>
+                            </x-filament::section>
+                        @endforeach
+                    </div>
+                @else
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1rem; text-align: center; opacity: 0.7;">
+                        <x-filament::icon icon="heroicon-s-bolt" style="width: 2rem; height: 2rem;" />
+                        <p>There are no actions on this trigger yet.</p>
+                    </div>
+                @endif
             </x-filament::section>
-        @endforeach
+        @empty
+            <x-filament::section>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1rem; text-align: center; opacity: 0.7;">
+                    <x-filament::icon icon="heroicon-s-bolt" style="width: 2rem; height: 2rem;" />
+                    <p>This workflow has no triggers. Use "Create Trigger" or "Attach Trigger" to start.</p>
+                </div>
+            </x-filament::section>
+        @endforelse
     </div>
 
-    @if (count($relationManagers))
-        <x-filament-panels::resources.relation-managers
-            :active-locale="isset($activeLocale) ? $activeLocale : null"
-            :active-manager="$this->activeRelationManager ?? ($hasCombinedRelationManagerTabsWithContent ? null : array_key_first($relationManagers))"
-            :content-tab-label="$this->getContentTabLabel()"
-            :content-tab-icon="$this->getContentTabIcon()"
-            :content-tab-position="$this->getContentTabPosition()"
-            :managers="$relationManagers"
-            :owner-record="$record"
-            :page-class="static::class"
-        >
-            @if ($hasCombinedRelationManagerTabsWithContent)
-                <x-slot name="content">
-                    @if ($this->hasInfolist())
-                        {{ $this->infolist }}
-                    @else
-                        {{ $this->form }}
-                    @endif
-                </x-slot>
-            @endif
-        </x-filament-panels::resources.relation-managers>
-    @endif
+    {{ $this->content }}
 </x-filament-panels::page>

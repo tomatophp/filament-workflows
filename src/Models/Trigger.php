@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use TomatoPHP\FilamentWorkflows\Database\Factories\TriggerFactory;
 
 /**
  * @property string $id
@@ -27,6 +28,11 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class Trigger extends Model
 {
     use HasFactory;
+
+    protected static function newFactory(): TriggerFactory
+    {
+        return TriggerFactory::new();
+    }
 
     /**
      * @var array

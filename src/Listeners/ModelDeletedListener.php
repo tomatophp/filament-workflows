@@ -2,40 +2,16 @@
 
 namespace TomatoPHP\FilamentWorkflows\Listeners;
 
-use Illuminate\Contracts\Queue\ShouldQueue;
-use TomatoPHP\FilamentWorkflows\Events\Models\ModelCreated;
-use TomatoPHP\FilamentWorkflows\Models\Workflow;
-use TomatoPHP\FilamentWorkflows\Models\WorkflowHasTrigger;
+use TomatoPHP\FilamentWorkflows\Events\Models\ModelDeleted;
+use TomatoPHP\FilamentWorkflows\Services\WorkflowRunner;
 
-class ModelDeletedListener implements ShouldQueue
+class ModelDeletedListener
 {
     /**
-     * Create the event listener.
+     * Run the actions of every active workflow using the "deleted" trigger.
      */
-    public function __construct() {}
-
-    /**
-     * Handle the event.
-     */
-    public function handle(ModelCreated $event): void
+    public function handle(ModelDeleted $event): void
     {
-        $workflows = Workflow::query()->whereHas('triggers', function ($query) use ($event) {
-            $query->where('trigger_id', $event->trigger->id);
-        })->get();
-
-        foreach ($workflows as $workflow) {
-            $getWorkflowTrigger = WorkflowHasTrigger::query()->where('workflow_id', $workflow->id)
-                ->where('trigger_id', $event->trigger->id)
-                ->first();
-
-            if ($getWorkflowTrigger) {
-                $actions = $getWorkflowTrigger->actions;
-                if (count($getWorkflowTrigger) > 0) {
-                    foreach ($actions as $action) {
-                        app($action->action->action)::run($event);
-                    }
-                }
-            }
-        }
+        WorkflowRunner::run($event->trigger, $event, WorkflowRunner::toPayload($event->data), $event->data);
     }
 }

@@ -2,10 +2,10 @@
     "name": "FilamentWorkflows",
     "alias": "filament-workflows",
     "description": {
-        "ar": "Manage and generate workflows using Filament Account Builder and Form Builder with multi approve steps",
-        "en": "Manage and generate workflows using Filament Account Builder and Form Builder with multi approve steps",
-        "gr": "Manage and generate workflows using Filament Account Builder and Form Builder with multi approve steps",
-        "sp": "Manage and generate workflows using Filament Account Builder and Form Builder with multi approve steps"
+        "ar": "Build workflows in FilamentPHP: model, event and webhook triggers that run registered actions and log every run",
+        "en": "Build workflows in FilamentPHP: model, event and webhook triggers that run registered actions and log every run",
+        "gr": "Build workflows in FilamentPHP: model, event and webhook triggers that run registered actions and log every run",
+        "sp": "Build workflows in FilamentPHP: model, event and webhook triggers that run registered actions and log every run"
     },
     "keywords": [],
     "priority": 0,
@@ -20,10 +20,10 @@
         "sp": "Workflows Builder"
     },
     "color": "#cc1448",
-    "icon": "heroicon-c-users",
-    "placeholder": "https://raw.githubusercontent.com/tomatophp/filament-workflows/master/art/screenshot.jpg",
+    "icon": "heroicon-o-arrows-right-left",
+    "placeholder": "https://raw.githubusercontent.com/tomatophp/filament-workflows/master/arts/3x1io-tomato-workflows.jpg",
     "type": "plugin",
-    "version": "v1.0.0",
-    "github" : "https://github.com/tomatophp/filament-workflows",
-    "docs" : "https://github.com/tomatophp/filament-workflows"
+    "version": "v5.0.0",
+    "github": "https://github.com/tomatophp/filament-workflows",
+    "docs": "https://github.com/tomatophp/filament-workflows"
 }

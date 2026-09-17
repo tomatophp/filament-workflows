@@ -3,41 +3,26 @@
 namespace TomatoPHP\FilamentWorkflows\Console;
 
 use Illuminate\Console\Command;
-use TomatoPHP\ConsoleHelpers\Traits\RunCommand;
 
 class FilamentWorkflowsInstall extends Command
 {
-    use RunCommand;
-
     /**
-     * The name and signature of the console command.
-     *
      * @var string
      */
     protected $name = 'filament-workflows:install';
 
     /**
-     * The console command description.
-     *
      * @var string
      */
-    protected $description = 'install package and publish assets';
+    protected $description = 'Install the workflows package: run its migrations and clear the caches';
 
-    public function __construct()
+    public function handle(): int
     {
-        parent::__construct();
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
-    public function handle()
-    {
-        $this->info('Publish Vendor Assets');
-        $this->artisanCommand(['migrate']);
-        $this->artisanCommand(['optimize:clear']);
+        $this->info('Running the workflow migrations');
+        $this->call('migrate', ['--force' => true]);
+        $this->call('optimize:clear');
         $this->info('Filament workflows installed successfully.');
+
+        return self::SUCCESS;
     }
 }

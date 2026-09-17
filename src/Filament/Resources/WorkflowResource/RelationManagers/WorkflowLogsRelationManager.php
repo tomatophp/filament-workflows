@@ -2,8 +2,8 @@
 
 namespace TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowResource\RelationManagers;
 
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowLogResource;
 
@@ -16,8 +16,8 @@ class WorkflowLogsRelationManager extends RelationManager
         return WorkflowLogResource::table($table);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return WorkflowLogResource::form($form);
+        return WorkflowLogResource::form($schema);
     }
 }

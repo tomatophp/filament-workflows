@@ -3,7 +3,7 @@ name: Workflows Builder
 slug: 3x1io-tomato-workflows
 author_slug: 3x1io
 categories: [developer-tools]
-description: Manage and generate workflows using Filament Account Builder and Form Builder with multi approve steps
+description: Build workflows in FilamentPHP with model, event and webhook triggers that run registered actions and log every run
 discord_url:
 docs_url: https://raw.githubusercontent.com/tomatophp/filament-workflows/master/README.md
 github_repository: tomatophp/filament-workflows

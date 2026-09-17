@@ -4,6 +4,9 @@ namespace TomatoPHP\FilamentWorkflows;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\ActionResource;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\TriggerResource;
+use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowLogResource;
 use TomatoPHP\FilamentWorkflows\Filament\Resources\WorkflowResource;
 
 class FilamentWorkflowsPlugin implements Plugin
@@ -17,6 +20,9 @@ class FilamentWorkflowsPlugin implements Plugin
     {
         $panel->resources([
             WorkflowResource::class,
+            TriggerResource::class,
+            ActionResource::class,
+            WorkflowLogResource::class,
         ]);
     }
 

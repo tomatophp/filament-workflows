@@ -3,31 +3,50 @@
 namespace TomatoPHP\FilamentWorkflows\Services;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Event;
+use TomatoPHP\FilamentWorkflows\Listeners\EventTriggerListener;
 use TomatoPHP\FilamentWorkflows\Services\Contracts\WorkflowAction;
 use TomatoPHP\FilamentWorkflows\Services\Contracts\WorkflowEvent;
 use TomatoPHP\FilamentWorkflows\Services\Contracts\WorkflowModel;
 
 class WorkflowServices
 {
+    /**
+     * @var array<string, WorkflowModel>
+     */
     protected array $models = [];
 
+    /**
+     * @var array<string, WorkflowEvent>
+     */
     protected array $events = [];
 
+    /**
+     * @var array<string, WorkflowAction>
+     */
     protected array $actions = [];
 
+    /**
+     * @param  WorkflowAction|array<int, WorkflowAction>  $action
+     */
     public function action(WorkflowAction|array $action): void
     {
         if (is_array($action)) {
             foreach ($action as $item) {
                 if ($item instanceof WorkflowAction) {
-                    $this->form($item);
+                    $this->action($item);
                 }
             }
-        } else {
-            $this->actions[] = $action;
+
+            return;
         }
+
+        $this->actions[$action->action] = $action;
     }
 
+    /**
+     * @param  WorkflowModel|array<int, WorkflowModel>  $model
+     */
     public function model(WorkflowModel|array $model): void
     {
         if (is_array($model)) {
@@ -36,11 +55,19 @@ class WorkflowServices
                     $this->model($item);
                 }
             }
-        } else {
-            $this->models[] = $model;
+
+            return;
         }
+
+        $this->models[$model->model] = $model;
     }
 
+    /**
+     * Register an application event as a workflow trigger source. Every time the
+     * event is dispatched, triggers of type "event" pointing to it are run.
+     *
+     * @param  WorkflowEvent|array<int, WorkflowEvent>  $event
+     */
     public function event(WorkflowEvent|array $event): void
     {
         if (is_array($event)) {
@@ -49,23 +76,29 @@ class WorkflowServices
                     $this->event($item);
                 }
             }
-        } else {
-            $this->events[] = $event;
+
+            return;
         }
+
+        if (! isset($this->events[$event->event])) {
+            Event::listen($event->event, EventTriggerListener::class);
+        }
+
+        $this->events[$event->event] = $event;
     }
 
     public function getModels(): Collection
     {
-        return collect($this->models);
+        return collect(array_values($this->models));
     }
 
     public function getEvents(): Collection
     {
-        return collect($this->events);
+        return collect(array_values($this->events));
     }
 
     public function getActions(): Collection
     {
-        return collect($this->actions);
+        return collect(array_values($this->actions));
     }
 }
